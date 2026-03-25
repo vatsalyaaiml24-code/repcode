@@ -7,5 +7,68 @@
 }
 
 body {
-  @apply bg-zinc-950 text-zinc-100 antialiased;
+  @apply bg-navy-950 text-zinc-100 antialiased min-h-screen relative;
+  background-image: theme('backgroundImage.mesh-gradient');
+  background-size: cover;
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism card utility */
+.glass-card {
+  @apply border border-white/10 rounded-2xl shadow-glass backdrop-blur-lg bg-white/10 shadow-inner-glow transition-all duration-300;
+  box-shadow: 0 4px 32px 0 rgba(59,130,246,0.15), 0 1.5px 8px 0 rgba(124,58,237,0.10), 0 0 0 1.5px rgba(255,255,255,0.08) inset;
+  backdrop-filter: blur(16px);
+}
+
+/* Frosted glass navbar utility */
+.frosted-navbar {
+  @apply bg-white/10 backdrop-blur-lg border-b border-white/10 shadow-glass;
+  box-shadow: 0 4px 32px 0 rgba(59,130,246,0.10);
+}
+
+/* Neon glow for logo */
+.neon-logo {
+  text-shadow: 0 0 8px #2563eb, 0 0 24px #2563eb44;
+}
+
+/* Gradient text for section titles */
+.gradient-title {
+  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Particle background (optional, can be improved with canvas/JS) */
+.particle-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Shimmer animation for buttons */
+.shimmer {
+  background: linear-gradient(90deg, #2563eb 25%, #7c3aed 50%, #2563eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+/* 3D press effect for white button */
+.pressable:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.18);
+}
+
+/* Card hover lift */
+.card-hover-lift:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 8px 32px 0 rgba(59,130,246,0.18), 0 2px 12px 0 rgba(124,58,237,0.12);
+}
+
+/* Smooth fade-slide-up entrance */
+.fade-slide-up {
+  animation: fade-slide-up 0.7s cubic-bezier(0.4,0,0.2,1);
 }
