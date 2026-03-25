@@ -10,6 +10,8 @@ export function LogForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[] | null>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -111,10 +113,61 @@ export function LogForm() {
         >
           {isLoading ? "Saving..." : "Save Decision"}
         </button>
+
+        <button
+          type="button"
+          onClick={async () => {
+            setSearchLoading(true);
+            setSearchResults(null);
+            setError(null);
+            try {
+              const q = (title || decision || "").trim();
+              if (!q) {
+                setError("Enter a title or decision to search memories");
+                return;
+              }
+
+              const resp = await fetch("/api/memories/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: q, limit: 5 })
+              });
+
+              const json = await resp.json();
+              if (!resp.ok) throw new Error(json.error || "Search failed");
+              setSearchResults(Array.isArray(json.results) ? json.results : []);
+            } catch (e) {
+              setError(e instanceof Error ? e.message : String(e));
+            } finally {
+              setSearchLoading(false);
+            }
+          }}
+          className="ml-3 rounded-md border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+        >
+          {searchLoading ? "Searching..." : "Find similar memories"}
+        </button>
       </form>
 
       {status ? <p className="mt-4 text-sm text-emerald-400">{status}</p> : null}
       {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
+
+      {searchResults ? (
+        <section className="mt-6 rounded-md border border-zinc-800 bg-zinc-900 p-4">
+          <h2 className="text-sm font-medium text-zinc-100">Similar memories</h2>
+          {searchResults.length === 0 ? (
+            <p className="mt-2 text-xs text-zinc-400">No similar memories found.</p>
+          ) : (
+            <ul className="mt-3 space-y-3 text-sm">
+              {searchResults.map((r: any) => (
+                <li key={r.id} className="rounded-md border border-zinc-800 p-3">
+                  <div className="text-sm font-medium text-zinc-100">{r.title ?? r.id}</div>
+                  <div className="mt-1 text-xs text-zinc-400">{r.summary ?? r.decision ?? r.context}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
     </section>
   );
 }

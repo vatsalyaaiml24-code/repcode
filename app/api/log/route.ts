@@ -1,54 +1,34 @@
 import { NextResponse } from "next/server";
 import { storeMemory } from "@/lib/membrain";
-import { summarizeDecision } from "@/lib/ai";
-
-type LogBody = {
-  title?: string;
-  decision?: string;
-  context?: string;
-  tags?: string[];
-};
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as LogBody;
-    const title = body.title?.trim();
-    const decision = body.decision?.trim();
-    const context = body.context?.trim();
-    const tags = Array.isArray(body.tags) ? body.tags : [];
+    const body = await request.json();
+
+    const { title, decision, context, tags } = body as {
+      title?: string;
+      decision?: string;
+      context?: string;
+      tags?: string[];
+    };
 
     if (!title || !decision) {
-      return NextResponse.json(
-        { error: "title and decision are required" },
-        {
-          status: 400
-        }
-      );
+      return NextResponse.json({ error: "Missing title or decision" }, { status: 400 });
     }
 
-    const projectId = process.env.DEFAULT_PROJECT_ID;
-    if (!projectId) {
-      return NextResponse.json({ error: "DEFAULT_PROJECT_ID is not configured" }, { status: 500 });
-    }
-
-    let summary = "";
-    try {
-      summary = await summarizeDecision(`${title}\n\n${decision}\n\n${context ?? ""}`);
-    } catch (summarizeError) {
-      console.error("[api/log] OpenRouter summarize failed (continuing without summary):", summarizeError);
-    }
+    const projectId = process.env.DEFAULT_PROJECT_ID ?? "default";
 
     const memory = await storeMemory({
       projectId,
       title,
       decision,
       context,
-      tags,
-      summary
+      tags
     });
 
-    return NextResponse.json({ memory }, { status: 201 });
+    return NextResponse.json({ message: "Decision logged", memory: { id: memory.id } }, { status: 200 });
   } catch (error) {
+    console.error("[api/log] Error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }

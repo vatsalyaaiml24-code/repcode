@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/log", label: "Log Decision" },
-  { href: "/ask", label: "Ask Memory" }
+  { href: "/upload", label: "Upload" },
+  { href: "/ask", label: "Ask" },
+  { href: "/log", label: "Log" }
 ];
 
 export function Navbar() {

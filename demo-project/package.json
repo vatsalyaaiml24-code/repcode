@@ -1,0 +1,9 @@
+{
+  "name": "demo-project",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.3"
+  }
+}
+

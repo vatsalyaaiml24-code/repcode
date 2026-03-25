@@ -256,3 +256,20 @@ export async function searchMemories(
     );
   }
 }
+
+export async function searchMemoriesByTag(
+  projectId: string,
+  tag: string,
+  query: string,
+  limit = 5
+): Promise<SearchMemoryResult[]> {
+  try {
+    // Membrain supports field filters using a bracket syntax in many deployments.
+    // We attempt a tag-filter query first, then fall back to keyword-based search.
+    const tagQuery = `[tag:${tag}] ${query}`.trim();
+    return await searchMemories(projectId, tagQuery, limit);
+  } catch (error) {
+    console.error("[membrain] searchMemoriesByTag failed; falling back to keyword search", error);
+    return searchMemories(projectId, `${tag} ${query}`.trim(), limit);
+  }
+}

@@ -1,6 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import {
+  readUploadedProjectSummary,
+  type UploadedProjectSummary
+} from "@/lib/uploadedProjectStorage";
 
 type MemoryItem = {
   id: string;
@@ -15,6 +19,12 @@ export function AskInterface() {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState<"memory" | "project">("memory");
+  const [projectSummary, setProjectSummary] = useState<UploadedProjectSummary | null>(null);
+
+  useEffect(() => {
+    setProjectSummary(readUploadedProjectSummary());
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,26 +34,57 @@ export function AskInterface() {
     setMemories([]);
 
     try {
-      const response = await fetch("/api/ask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ question })
-      });
+      if (mode === "memory") {
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ question })
+        });
 
-      const data = (await response.json()) as {
-        error?: string;
-        answer?: string;
-        memoriesUsed?: MemoryItem[];
-      };
+        const data = (await response.json()) as {
+          error?: string;
+          answer?: string;
+          memoriesUsed?: MemoryItem[];
+        };
 
-      if (!response.ok) {
-        throw new Error(data.error ?? "Failed to answer question");
+        if (!response.ok) {
+          throw new Error(data.error ?? "Failed to answer question");
+        }
+
+        setAnswer(data.answer ?? "No answer generated.");
+        setMemories(data.memoriesUsed ?? []);
+      } else {
+        if (!projectSummary) {
+          throw new Error(
+            "No uploaded project analysis found. Upload a project first, then ask from “uploaded project”."
+          );
+        }
+
+        const response = await fetch("/api/ask/project", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            question,
+            project: projectSummary
+          })
+        });
+
+        const data = (await response.json()) as {
+          error?: string;
+          answer?: string;
+        };
+
+        if (!response.ok) {
+          throw new Error(data.error ?? "Failed to answer from uploaded project");
+        }
+
+        setAnswer(data.answer ?? "No answer generated.");
+        setMemories([]);
       }
-
-      setAnswer(data.answer ?? "No answer generated.");
-      setMemories(data.memoriesUsed ?? []);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Unexpected error");
     } finally {
@@ -53,10 +94,49 @@ export function AskInterface() {
 
   return (
     <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <h1 className="text-xl font-semibold">Ask Project Memory</h1>
+      <h1 className="text-xl font-semibold">Ask the Project</h1>
       <p className="mt-2 text-sm text-zinc-400">
-        Ask a question and get an answer grounded in stored project decisions.
+        Ask from stored memory or from your latest uploaded project analysis.
       </p>
+
+      <div className="mt-6 flex gap-3">
+        <div className="w-full">
+          <div className="flex rounded-lg border border-zinc-800 bg-zinc-950 p-1">
+            <button
+              type="button"
+              onClick={() => setMode("memory")}
+              className={[
+                "flex-1 rounded-md px-3 py-2 text-sm font-medium transition",
+                mode === "memory"
+                  ? "bg-zinc-100 text-zinc-900"
+                  : "text-zinc-300 hover:bg-zinc-800"
+              ].join(" ")}
+            >
+              Ask from memory
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("project")}
+              disabled={!projectSummary}
+              className={[
+                "flex-1 rounded-md px-3 py-2 text-sm font-medium transition",
+                mode === "project"
+                  ? "bg-zinc-100 text-zinc-900"
+                  : "text-zinc-300 hover:bg-zinc-800",
+                !projectSummary ? "cursor-not-allowed opacity-60" : ""
+              ].join(" ")}
+            >
+              Ask from uploaded project
+            </button>
+          </div>
+
+          {mode === "project" && !projectSummary ? (
+            <p className="mt-2 text-xs text-amber-300">
+              Upload a project first to enable this mode.
+            </p>
+          ) : null}
+        </div>
+      </div>
 
       <form onSubmit={onSubmit} className="mt-6 flex gap-3">
         <input
@@ -71,7 +151,33 @@ export function AskInterface() {
           disabled={isLoading}
           className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 disabled:opacity-60"
         >
-          {isLoading ? "Thinking..." : "Ask"}
+          {isLoading ? (
+            <span className="inline-flex items-center gap-2">
+              <svg
+                className="h-4 w-4 animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+              Thinking...
+            </span>
+          ) : (
+            "Ask"
+          )}
         </button>
       </form>
 
