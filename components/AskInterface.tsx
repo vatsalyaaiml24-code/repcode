@@ -5,6 +5,8 @@ import {
   readUploadedProjectSummary,
   type UploadedProjectSummary
 } from "@/lib/uploadedProjectStorage";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Sparkles, Folder, Brain, Loader2 } from "lucide-react";
 
 type MemoryItem = {
   id: string;
@@ -93,25 +95,37 @@ export function AskInterface() {
   }
 
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <h1 className="text-xl font-semibold">Ask the Project</h1>
-      <p className="mt-2 text-sm text-zinc-400">
-        Ask from stored memory or from your latest uploaded project analysis.
-      </p>
+    <motion.section 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-3xl mx-auto mt-8 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl"
+    >
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-indigo-500/20 rounded-xl">
+          <Sparkles className="w-6 h-6 text-indigo-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Ask the Project</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Ask from stored memory or from your latest uploaded project analysis.
+          </p>
+        </div>
+      </div>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-8 flex gap-3">
         <div className="w-full">
-          <div className="flex rounded-lg border border-zinc-800 bg-zinc-950 p-1">
+          <div className="flex rounded-xl border border-white/5 bg-black/20 p-1.5 backdrop-blur-sm">
             <button
               type="button"
               onClick={() => setMode("memory")}
               className={[
-                "flex-1 rounded-md px-3 py-2 text-sm font-medium transition",
+                "flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300",
                 mode === "memory"
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-300 hover:bg-zinc-800"
+                  ? "bg-white/10 text-white shadow-sm"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
               ].join(" ")}
             >
+              <Brain className="w-4 h-4" />
               Ask from memory
             </button>
             <button
@@ -119,93 +133,95 @@ export function AskInterface() {
               onClick={() => setMode("project")}
               disabled={!projectSummary}
               className={[
-                "flex-1 rounded-md px-3 py-2 text-sm font-medium transition",
+                "flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300",
                 mode === "project"
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-300 hover:bg-zinc-800",
-                !projectSummary ? "cursor-not-allowed opacity-60" : ""
+                  ? "bg-white/10 text-white shadow-sm"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-white/5",
+                !projectSummary ? "cursor-not-allowed opacity-40" : ""
               ].join(" ")}
             >
+              <Folder className="w-4 h-4" />
               Ask from uploaded project
             </button>
           </div>
 
           {mode === "project" && !projectSummary ? (
-            <p className="mt-2 text-xs text-amber-300">
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-amber-400/80 flex items-center gap-1.5 px-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
               Upload a project first to enable this mode.
-            </p>
+            </motion.p>
           ) : null}
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="mt-6 flex gap-3">
-        <input
-          required
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-          className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm outline-none ring-zinc-300 placeholder:text-zinc-500 focus:ring-1"
-          placeholder="Why did we choose REST over GraphQL?"
-        />
+      <form onSubmit={onSubmit} className="mt-8 flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          <input
+            required
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-black/20 pl-11 pr-4 py-3 text-sm text-white outline-none ring-indigo-500/50 placeholder:text-slate-500 focus:border-indigo-500/50 focus:ring-2 transition-all"
+            placeholder="Why did we choose REST over GraphQL?"
+          />
+        </div>
         <button
           type="submit"
           disabled={isLoading}
-          className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 disabled:opacity-60"
+          className="rounded-xl bg-indigo-500 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 disabled:opacity-60 hover:bg-indigo-600 transition-colors flex items-center gap-2"
         >
           {isLoading ? (
-            <span className="inline-flex items-center gap-2">
-              <svg
-                className="h-4 w-4 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
               Thinking...
-            </span>
+            </>
           ) : (
             "Ask"
           )}
         </button>
       </form>
 
-      {error ? <p className="mt-4 text-sm text-red-400">{error}</p> : null}
+      <AnimatePresence>
+        {error ? (
+          <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-4 text-sm text-red-400 bg-red-400/10 p-3 rounded-xl border border-red-400/20">
+            {error}
+          </motion.p>
+        ) : null}
 
-      {answer ? (
-        <div className="mt-6 rounded-md border border-zinc-800 bg-zinc-950 p-4">
-          <h2 className="mb-2 text-sm font-semibold text-zinc-300">Answer</h2>
-          <p className="whitespace-pre-wrap text-sm text-zinc-200">{answer}</p>
-        </div>
-      ) : null}
+        {answer ? (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8 rounded-xl border border-white/10 bg-black/20 p-6 backdrop-blur-md">
+            <h2 className="mb-3 text-sm font-semibold tracking-wider text-indigo-300 uppercase">Answer</h2>
+            <p className="whitespace-pre-wrap text-base leading-relaxed text-slate-200">{answer}</p>
+          </motion.div>
+        ) : null}
 
-      {memories.length > 0 ? (
-        <div className="mt-6">
-          <h3 className="mb-2 text-sm font-semibold text-zinc-300">Memories Used</h3>
-          <ul className="space-y-2">
-            {memories.map((memory) => (
-              <li key={memory.id} className="rounded-md border border-zinc-800 bg-zinc-950 p-3">
-                <p className="text-sm font-medium text-zinc-100">{memory.title ?? "Untitled memory"}</p>
-                {memory.summary ? <p className="mt-1 text-sm text-zinc-400">{memory.summary}</p> : null}
-                {typeof memory.score === "number" ? (
-                  <p className="mt-1 text-xs text-zinc-500">Score: {memory.score.toFixed(3)}</p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </section>
+        {memories.length > 0 ? (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
+            <h3 className="mb-4 text-sm font-semibold tracking-wider text-slate-400 uppercase">Memories Used</h3>
+            <ul className="space-y-3">
+              {memories.map((memory, i) => (
+                <motion.li 
+                  initial={{ opacity: 0, x: -10 }} 
+                  animate={{ opacity: 1, x: 0 }} 
+                  transition={{ delay: i * 0.1 }}
+                  key={memory.id} 
+                  className="rounded-xl border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+                >
+                  <p className="text-base font-medium text-slate-100">{memory.title ?? "Untitled memory"}</p>
+                  {memory.summary ? <p className="mt-2 text-sm leading-relaxed text-slate-400">{memory.summary}</p> : null}
+                  {typeof memory.score === "number" ? (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] font-medium text-indigo-300 border border-indigo-500/20">
+                        Score: {memory.score.toFixed(3)}
+                      </span>
+                    </div>
+                  ) : null}
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </motion.section>
   );
 }

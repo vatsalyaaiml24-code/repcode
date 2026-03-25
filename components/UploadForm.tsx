@@ -6,6 +6,8 @@ import {
   writeUploadedProjectSummary,
   type UploadedProjectSummary
 } from "@/lib/uploadedProjectStorage";
+import { motion, AnimatePresence } from "framer-motion";
+import { UploadCloud, FolderUp, CheckCircle2, AlertCircle, Loader2, FileCode2, Sparkles } from "lucide-react";
 
 type UploadApiResponse = {
   error?: string;
@@ -186,27 +188,36 @@ export function UploadForm() {
   const hasMore = files.length > 20;
 
   return (
-    <div className="min-h-screen w-full p-6 flex items-center justify-center">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full pt-8 pb-12 flex justify-center"
+    >
       <section
-        className="w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-8 shadow-xl backdrop-blur"
+        className="w-full max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 shadow-2xl backdrop-blur-xl"
         aria-label="Upload files"
       >
-        <header className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-100">Project Upload</h1>
-          <p className="mt-2 text-sm text-zinc-300">
-            Upload code/text files (and folders) from your project. The backend will log file
-            contents and generate an AI summary.
-          </p>
+        <header className="mb-8 flex items-center gap-4">
+          <div className="p-3 bg-indigo-500/20 rounded-xl">
+            <FolderUp className="w-6 h-6 text-indigo-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Project Upload</h1>
+            <p className="mt-1 text-sm text-slate-400">
+              Upload code or folders from your project. The backend will log file
+              contents and generate an AI summary.
+            </p>
+          </div>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
+        <div className="grid gap-6 md:grid-cols-5">
+          <div className="md:col-span-3">
             <div
               className={[
-                "rounded-xl border p-5 transition-colors",
+                "h-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-300",
                 isDragActive
-                  ? "border-indigo-400/80 bg-indigo-400/10"
-                  : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-700"
+                  ? "border-indigo-400 bg-indigo-500/10 scale-[1.02]"
+                  : "border-white/10 bg-black/20 hover:border-indigo-500/50 hover:bg-white/5"
               ].join(" ")}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -215,101 +226,98 @@ export function UploadForm() {
               tabIndex={0}
               aria-label="Drag and drop upload zone"
             >
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-800 text-zinc-100">
-                  ⬆
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-zinc-100">Drag & drop</p>
-                  <p className="mt-1 text-xs text-zinc-400">
-                    Drop files or a folder (where supported). Nested paths are preserved.
-                  </p>
-                </div>
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/20 mb-4 group-hover:bg-indigo-500/30 transition-colors">
+                <UploadCloud className="w-8 h-8 text-indigo-400" />
               </div>
-
-              <div className="mt-4">
-                <p className="text-xs text-zinc-400">
-                  Accepted: {ACCEPTED_EXTENSIONS.join(", ")}
-                </p>
-              </div>
+              <p className="text-lg font-medium text-slate-200">Drag & drop files or folders here</p>
+              <p className="mt-2 text-sm text-slate-400 max-w-xs mx-auto">
+                Accepted: {ACCEPTED_EXTENSIONS.join(", ")}
+              </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/35 p-4">
-              <label className="block text-sm font-medium text-zinc-100" htmlFor="upload-files">
+          <div className="md:col-span-2 space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5 backdrop-blur-sm">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 Choose files
               </label>
               <input
-                id="upload-files"
                 type="file"
                 accept={acceptedTypesAttr}
                 multiple
-                className="mt-2 block w-full cursor-pointer rounded-md border border-zinc-800 bg-zinc-950 p-2 text-sm text-zinc-200 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-500/20 file:px-3 file:py-2 file:text-indigo-100 hover:file:bg-indigo-500/30"
+                className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-indigo-500/20 file:text-indigo-300 hover:file:bg-indigo-500/30 file:transition-colors cursor-pointer"
                 onChange={handleFileInput}
               />
             </div>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/35 p-4">
-              <label
-                className="block text-sm font-medium text-zinc-100"
-                htmlFor="upload-folder"
-              >
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5 backdrop-blur-sm">
+              <label className="block text-sm font-semibold text-slate-200 mb-2">
                 Choose a folder
               </label>
               <input
-                id="upload-folder"
                 type="file"
                 {...webkitDirectoryProps}
                 multiple
                 accept={acceptedTypesAttr}
-                className="mt-2 block w-full cursor-pointer rounded-md border border-zinc-800 bg-zinc-950 p-2 text-sm text-zinc-200 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-500/20 file:px-3 file:py-2 file:text-indigo-100 hover:file:bg-indigo-500/30"
+                className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-indigo-500/20 file:text-indigo-300 hover:file:bg-indigo-500/30 file:transition-colors cursor-pointer"
                 onChange={handleFileInput}
               />
             </div>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/35 p-4">
-              <div className="flex items-center justify-between gap-4">
+            <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-5">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-zinc-100">Selection</p>
-                  <p className="mt-1 text-xs text-zinc-400">
-                    {selectedCount > 0 ? `${selectedCount} files` : "No files selected"}
+                  <p className="text-sm font-semibold text-indigo-200">Selection</p>
+                  <p className="mt-1 text-2xl font-bold text-indigo-400">
+                    {selectedCount > 0 ? selectedCount : "0"} <span className="text-sm font-medium text-indigo-300 opacity-80">files</span>
                   </p>
-                  <p className="mt-1 text-xs text-zinc-400">
+                  <p className="mt-1 text-xs text-indigo-300/70">
                     Total size: {formatBytes(totalSizeBytes)}
                   </p>
                 </div>
+                <FileCode2 className="w-8 h-8 text-indigo-400/50" />
               </div>
             </div>
           </div>
         </div>
 
-        {files.length > 0 ? (
-          <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-950/35 p-4">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-zinc-100">Files to upload</p>
-              <p className="text-xs text-zinc-400">Showing first 20</p>
-            </div>
+        <AnimatePresence>
+          {files.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-6 rounded-2xl border border-white/10 bg-black/20 overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
+                <p className="text-sm font-semibold text-slate-200">Files to upload</p>
+                <p className="text-xs text-slate-400">Showing first 20</p>
+              </div>
 
-            <div className="mt-3 max-h-60 overflow-auto rounded-lg border border-zinc-800 bg-zinc-950/40">
-              <ul className="divide-y divide-zinc-800">
-                {topFiles.map((f, idx) => (
-                  <li key={`${getDisplayPath(f)}-${idx}`} className="px-3 py-2">
-                    <p className="truncate text-xs text-zinc-200">{getDisplayPath(f)}</p>
-                  </li>
-                ))}
-                {hasMore ? (
-                  <li className="px-3 py-2">
-                    <p className="text-xs text-zinc-500">...and more</p>
-                  </li>
-                ) : null}
-              </ul>
-            </div>
-          </div>
-        ) : null}
+              <div className="max-h-60 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <ul className="space-y-1 text-sm">
+                  {topFiles.map((f, idx) => (
+                    <motion.li 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      key={`${getDisplayPath(f)}-${idx}`} 
+                      className="px-3 py-2 rounded-lg bg-white/5 text-slate-300 truncate"
+                    >
+                      {getDisplayPath(f)}
+                    </motion.li>
+                  ))}
+                  {hasMore && (
+                    <li className="px-3 py-2 text-slate-500 italic text-xs">...and more</li>
+                  )}
+                </ul>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <div className="text-xs text-zinc-400">
+        <div className="mt-8 flex items-center justify-between gap-4 pt-6 border-t border-white/10">
+          <div className="text-sm text-slate-400 font-medium">
             {files.length > 0 ? "Ready to upload." : "Pick files or a folder to begin."}
           </div>
 
@@ -318,106 +326,104 @@ export function UploadForm() {
             onClick={() => void handleUpload()}
             disabled={files.length === 0 || isUploading}
             className={[
-              "inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition",
+              "inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold transition-all duration-300 shadow-lg",
               files.length === 0 || isUploading
-                ? "cursor-not-allowed bg-zinc-800 text-zinc-400"
-                : "bg-indigo-500/90 text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/60"
+                ? "cursor-not-allowed bg-white/5 text-slate-500 shadow-none border border-white/5"
+                : "bg-indigo-500 text-white shadow-indigo-500/25 hover:bg-indigo-600 hover:scale-[1.02] hover:shadow-indigo-500/40"
             ].join(" ")}
           >
             {isUploading ? (
-              <svg
-                className="h-4 w-4 animate-spin text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
-            ) : null}
-            <span>{isUploading ? "Analyzing project..." : "Upload"}</span>
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+                Analyzing project...
+              </>
+            ) : "Upload and Analyze"}
           </button>
         </div>
 
-        {status ? (
-          <div
-            className={[
-              "mt-4 rounded-xl border p-4 text-sm",
-              status.type === "success"
-                ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-100"
-                : "border-red-400/30 bg-red-400/10 text-red-100"
-            ].join(" ")}
-            role="status"
-          >
-            {status.text}
-          </div>
-        ) : null}
+        <AnimatePresence>
+          {status && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={[
+                "mt-6 rounded-xl flex items-start gap-3 p-4 text-sm font-medium",
+                status.type === "success"
+                  ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                  : "border border-red-500/20 bg-red-500/10 text-red-300"
+              ].join(" ")}
+              role="status"
+            >
+              {status.type === "success" ? (
+                <CheckCircle2 className="w-5 h-5 shrink-0" />
+              ) : (
+                <AlertCircle className="w-5 h-5 shrink-0" />
+              )}
+              {status.text}
+            </motion.div>
+          )}
 
-        {projectSummary ? (
-          <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-950/35 p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-sm font-semibold text-zinc-100">AI Project Summary</h2>
-                <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-200">
+          {projectSummary && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-6 backdrop-blur-md"
+            >
+              <div className="mb-6">
+                <h2 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-indigo-400" />
+                  AI Project Summary
+                </h2>
+                <p className="mt-3 leading-relaxed text-sm text-slate-300">
                   {projectSummary.summary}
                 </p>
               </div>
-            </div>
 
-            {projectSummary.architecture ? (
-              <div className="mt-4">
-                <p className="text-xs font-medium text-zinc-300">Architecture</p>
-                <pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-zinc-800 bg-zinc-950/40 p-3 text-sm text-zinc-200">
-                  {projectSummary.architecture}
-                </pre>
-              </div>
-            ) : null}
-
-            {projectSummary.apiEndpoints.length > 0 ? (
-              <div className="mt-4">
-                <p className="text-xs font-medium text-zinc-300">API Endpoints</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {projectSummary.apiEndpoints.map((e, i) => (
-                    <span
-                      key={`${e}-${i}`}
-                      className="rounded-full border border-zinc-800 bg-zinc-950/40 px-3 py-1 text-xs text-indigo-200"
-                    >
-                      {e}
-                    </span>
-                  ))}
+              {projectSummary.architecture && (
+                <div className="mt-6">
+                  <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Architecture</p>
+                  <pre className="max-h-56 overflow-auto scrollbar-thin scrollbar-thumb-white/10 whitespace-pre-wrap rounded-xl border border-white/5 bg-white/5 p-4 text-sm text-slate-300 leading-relaxed font-mono">
+                    {projectSummary.architecture}
+                  </pre>
                 </div>
-              </div>
-            ) : null}
+              )}
 
-            {projectSummary.techStack.length > 0 ? (
-              <div className="mt-4">
-                <p className="text-xs font-medium text-zinc-300">Tech stack</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {projectSummary.techStack.map((t, i) => (
-                    <span
-                      key={`${t}-${i}`}
-                      className="rounded-full border border-zinc-800 bg-zinc-950/40 px-3 py-1 text-xs text-indigo-200"
-                    >
-                      {t}
-                    </span>
-                  ))}
+              {projectSummary.apiEndpoints.length > 0 && (
+                <div className="mt-6">
+                  <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">API Endpoints</p>
+                  <div className="flex flex-wrap gap-2">
+                    {projectSummary.apiEndpoints.map((e, i) => (
+                      <span
+                        key={`${e}-${i}`}
+                        className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300"
+                      >
+                        {e}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
+              )}
+
+              {projectSummary.techStack.length > 0 && (
+                <div className="mt-6 flex flex-col">
+                  <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Tech stack</p>
+                  <div className="flex flex-wrap gap-2">
+                    {projectSummary.techStack.map((t, i) => (
+                      <span
+                        key={`${t}-${i}`}
+                        className="rounded-lg border border-purple-500/20 bg-purple-500/10 px-3 py-1.5 text-xs font-medium text-purple-300"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
-    </div>
+    </motion.div>
   );
 }
