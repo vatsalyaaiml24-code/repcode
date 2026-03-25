@@ -28,7 +28,7 @@ Summary: ${m.summary ?? "N/A"}
     .join("\n");
 
   const response = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",  // ✅ CURRENT WORKING
+    model: "llama-3.1-8b-instant",
     messages: [
       {
         role: "system",
@@ -42,5 +42,22 @@ Summary: ${m.summary ?? "N/A"}
   });
 
   return response.choices[0]?.message?.content || "No response";
-  console.log("KEY:", process.env.GROQ_API_KEY);
+}
+
+export async function summarizeDecision(text: string): Promise<string> {
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [
+      {
+        role: "system",
+        content: "Generate a concise 1-2 sentence summary of the decision and its context. Focus on the key takeaway.",
+      },
+      {
+        role: "user",
+        content: text,
+      },
+    ],
+  });
+
+  return response.choices[0]?.message?.content?.trim() || "No summary generated";
 }
