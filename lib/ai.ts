@@ -1,8 +1,12 @@
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing GROQ_API_KEY");
+  }
+  return new Groq({ apiKey });
+}
 
 type MemoryForAnswer = {
   title?: string;
@@ -41,6 +45,7 @@ export async function answerQuestion(
   question: string,
   memories: MemoryForAnswer[]
 ): Promise<string> {
+  const groq = getGroqClient();
   const memoryContext = memories
     .map((m, i) => {
       return `
@@ -71,6 +76,7 @@ Summary: ${m.summary ?? "N/A"}
 }
 
 export async function summarizeDecision(text: string): Promise<string> {
+  const groq = getGroqClient();
   const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [
@@ -90,6 +96,7 @@ export async function summarizeDecision(text: string): Promise<string> {
 }
 
 export async function analyzeProject(projectText: string): Promise<ProjectAnalysis> {
+  const groq = getGroqClient();
   const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [
@@ -149,6 +156,7 @@ export async function answerFromProjectAnalysis(
   analysis: ProjectAnalysis,
   question: string
 ): Promise<string> {
+  const groq = getGroqClient();
   const analysisText = `
 Project summary:
 ${analysis.summary}
@@ -179,5 +187,4 @@ ${analysis.apiEndpoints.map((e, i) => `${i + 1}. ${e}`).join("\n")}
   });
 
   return response.choices[0]?.message?.content?.trim() || "No response";
-}
 }

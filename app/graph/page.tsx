@@ -28,7 +28,7 @@ export default function GraphPage() {
 
         <div className="mt-6 rounded-lg border border-zinc-800 bg-zinc-950/30 p-4">
           <h3 className="text-sm font-medium text-zinc-100">Want a new UI here?</h3>
-          <p className="mt-2 text-xs text-zinc-400">I can build a replacement visual — e.g., a searchable list, timeline, or an alternative graph using a lightweight, embed-only viewer. Tell me which you'd prefer and I'll implement it.</p>
+          <p className="mt-2 text-xs text-zinc-400">I can build a replacement visual — e.g., a searchable list, timeline, or an alternative graph using a lightweight, embed-only viewer. Tell me which you&apos;d prefer and I&apos;ll implement it.</p>
         </div>
       </section>
     </main>

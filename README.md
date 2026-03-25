@@ -159,6 +159,16 @@ repcode/
 
    **Important**: Ensure all environment variables are set in your hosting platform.
 
+### Production readiness checklist
+
+- Ensure the following environment variables are configured in your deployment environment: `GROQ_API_KEY`, `MEMBRAIN_API_KEY`, `MEMBRAIN_BASE_URL`, `DEFAULT_PROJECT_ID`.
+- Keep API keys server-side only (do not export them to client bundles).
+- Verify `next build` completes successfully in CI and that `npm start` uses a production-ready Node (18+).
+- Add health checks or a simple `/api/health` endpoint if your host requires it.
+- Use a secrets manager or the platform's environment settings rather than committing `.env.local`.
+
+See `.env.example` at the repository root for an example of required variables.
+
 ## Environment Variables Reference
 
 | Variable | Description | Required |
